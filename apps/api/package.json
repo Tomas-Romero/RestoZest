@@ -1,0 +1,23 @@
+{
+  "name": "api",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "start": "tsx src/main.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@fastify/cookie": "^11.0.2",
+    "@fastify/cors": "^10.0.2",
+    "@resto-zest/db": "workspace:*",
+    "@resto-zest/domain": "workspace:*",
+    "dotenv": "^16.4.7",
+    "drizzle-orm": "^0.38.2",
+    "fastify": "^5.2.0",
+    "zod": "^3.24.1"
+  }
+}

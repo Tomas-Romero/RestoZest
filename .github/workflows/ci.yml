@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgres://resto_zest:resto_zest@localhost:5432/resto_zest_dev
+      AUTH_DATABASE_URL: postgres://resto_zest_auth:resto_zest_auth@localhost:5432/resto_zest_dev
+      ADMIN_ORIGIN: http://localhost:5173
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Instalar dependencias
+        run: pnpm install --frozen-lockfile
+
+      # El rol de la app (resto_zest / resto_zest_auth) normalmente lo crea
+      # packages/db/docker/init.sql al levantar el contenedor local. El
+      # servicio de Postgres de GitHub Actions no soporta scripts de init,
+      # así que lo corremos acá a mano contra el superusuario por defecto.
+      - name: Preparar rol y base de datos
+        run: PGPASSWORD=postgres psql -h localhost -U postgres -f packages/db/docker/init.sql
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Migraciones
+        run: pnpm db:migrate
+
+      - name: Tests
+        run: pnpm test
