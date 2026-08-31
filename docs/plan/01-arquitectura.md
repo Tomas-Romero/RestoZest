@@ -45,7 +45,7 @@ Mini-PC x86 (N100, 8 GB RAM, SSD) o Raspberry Pi 5. Debian + Docker Compose. UPS
 
 **Red**
 
-Router propio del hub o VLAN dedicada. El hub anuncia `gastro.local` por mDNS y tiene IP fija de respaldo. Los dispositivos prueban LAN primero, nube después.
+Router propio del hub o VLAN dedicada. El hub anuncia `restozest.local` por mDNS y tiene IP fija de respaldo. Los dispositivos prueban LAN primero, nube después.
 
 **Costo por local**
 

@@ -23,7 +23,7 @@ El esqueleto sobre el que se apoya todo. Aburrido y determinante.
 #### Prompt de arranque para Claude Code
 
 ```
-Vamos a arrancar el proyecto GastroControl: un SaaS multi-tenant de gestión
+Vamos a arrancar el proyecto Resto Zest: un SaaS multi-tenant de gestión
 gastronómica. Leé el plan técnico adjunto antes de escribir código.
 
 Tarea de esta sesión — solo Fase 0:
@@ -63,7 +63,7 @@ Cargás un menú real de una rotisería completa —con combos y modificadores�
 #### Prompt de arranque para Claude Code
 
 ```
-Fase 1 de GastroControl: catálogo y su ABM en el panel admin.
+Fase 1 de Resto Zest: catálogo y su ABM en el panel admin.
 
 1. Migraciones: categories, products, product_variants, modifier_groups,
    modifiers, product_modifier_groups, combos, combo_items, price_lists,
@@ -135,7 +135,7 @@ Simulás un servicio de 20 mesas entre dos personas y el KDS refleja todo sin re
 #### Prompt de arranque para Claude Code
 
 ```
-Fase 3: núcleo operativo de GastroControl (todavía 100% online).
+Fase 3: núcleo operativo de Resto Zest (todavía 100% online).
 
 1. Migraciones: areas, tables, table_sessions, orders, order_items,
    order_events, kitchen_tickets, stations. Ver sección 03 del plan.
@@ -207,7 +207,7 @@ los competidores.
 La fase difícil y la que define si el producto es serio. Todo lo anterior existe y funciona; ahora sobrevive a un corte.
 
 - **`apps/hub`**: el mismo binario de la API con `ROLE=hub`, Postgres local, Docker Compose y actualizaciones por imagen versionada.
-- **Descubrimiento**: mDNS (`gastro.local`) + IP fija de respaldo. La PWA prueba LAN, después nube, y recuerda cuál funcionó.
+- **Descubrimiento**: mDNS (`restozest.local`) + IP fija de respaldo. La PWA prueba LAN, después nube, y recuerda cuál funcionó.
 - **Sync descendente**: catálogo, usuarios y config desde la nube por cursor incremental (`updated_at` + `server_seq`).
 - **Sync ascendente**: outbox del hub hacia la nube, secuencial, idempotente, con backoff.
 - **Outbox en el dispositivo** (Dexie) para el nivel L2, con la misma semántica.
@@ -234,7 +234,7 @@ Leé de nuevo la sección 04 del plan técnico antes de empezar.
      MISMA orden, no de todas.
    - Receptor idempotente: insertar un evento ya existente devuelve 200, no error.
    - Pull descendente por cursor (server_seq) para catálogo, usuarios y config.
-3. Descubrimiento: el hub se anuncia por mDNS como gastro.local. El cliente
+3. Descubrimiento: el hub se anuncia por mDNS como restozest.local. El cliente
    prueba LAN (timeout 800ms) → nube (2500ms) → offline, cada 5s, y persiste
    la última ruta que funcionó.
 4. Store global de nivel L0/L1/L2 + helper canDo(action, level). Barra de estado

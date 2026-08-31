@@ -47,8 +47,8 @@ Al volver el enlace, cada outbox se vacía en orden de `lamport` con backoff exp
 ```ts
 // No alcanza con navigator.onLine: miente. Sonda activa cada 5s.
 const probe = async () => {
-  const lan   = await ping(`http://gastro.local:3001/health`, { timeout: 800 });
-  const cloud = await ping(`https://api.gastrocontrol.app/health`, { timeout: 2500 });
+  const lan   = await ping(`http://restozest.local:3001/health`, { timeout: 800 });
+  const cloud = await ping(`https://api.restozest.app/health`, { timeout: 2500 });
   return lan && cloud ? 'L0'
        : lan            ? 'L1'
        : 'L2';

@@ -1,4 +1,4 @@
-# GastroControl
+# Resto Zest
 
 SaaS multi-tenant de gestión gastronómica. Cinco apps operativas + menú público,
 arquitectura nube + hub local en el salón, offline-first.

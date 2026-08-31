@@ -1,6 +1,6 @@
 ---
 name: fase
-description: Arranca o continúa una fase del roadmap de GastroControl. Uso: /fase 3
+description: Arranca o continúa una fase del roadmap de Resto Zest. Uso: /fase 3
 disable-model-invocation: true
 ---
 

@@ -1,4 +1,4 @@
-# Plan técnico de GastroControl
+# Plan técnico de Resto Zest
 
 **No leas todo esto de una.** Cada archivo se lee cuando la tarea lo pide.
 `CLAUDE.md` en la raíz ya tiene las reglas que aplican siempre.

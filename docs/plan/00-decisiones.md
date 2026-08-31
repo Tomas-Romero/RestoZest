@@ -1,6 +1,6 @@
 # Punto de partida
 
-*GastroControl* es un nombre de trabajo, alineado con KiosControl para que compartan familia de marca. Cambialo cuando quieras: no está acoplado a nada técnico.
+El proyecto se llama *Resto Zest*.
 
 Estas seis decisiones determinan casi todo lo que sigue. Cuatro las definiste vos; las otras dos son consecuencia directa.
 

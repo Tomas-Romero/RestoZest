@@ -1,12 +1,12 @@
 # Cómo usar este bundle
 
-Estos archivos van **dentro del repo de GastroControl**, no se pegan en el chat.
+Estos archivos van **dentro del repo de Resto Zest**, no se pegan en el chat.
 Claude Code los lee solo.
 
 ## Instalación
 
 ```bash
-mkdir gastrocontrol && cd gastrocontrol && git init
+mkdir resto-zest && cd resto-zest && git init
 # copiá el contenido de este bundle en la raíz del repo
 git add . && git commit -m "docs: plan técnico y configuración de Claude Code"
 claude
@@ -15,7 +15,7 @@ claude
 Quedan así:
 
 ```
-gastrocontrol/
+resto-zest/
 ├── CLAUDE.md                    ← se carga en TODA sesión. Mantenelo corto.
 ├── docs/
 │   ├── ESTADO.md                ← la memoria entre sesiones. Se actualiza al cerrar cada una.
