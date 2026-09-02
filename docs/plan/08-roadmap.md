@@ -1,6 +1,6 @@
 # Roadmap por fases
 
-Diez fases. Cada una termina en algo que **se puede mostrar o vender**, no en «infraestructura lista». Las estimaciones asumen vos solo, trabajando con Claude Code, con dedicación parcial.
+Diez fases. Cada una termina en algo que **se puede mostrar o vender**, no en «infraestructura lista». Las estimaciones asumen vos solo, con dedicación parcial.
 
 El orden tiene una decisión deliberada: **offline-first llega en la Fase 5, no en la 1**. No se puede hacer resiliente algo que todavía no existe, y persiguiendo la resiliencia desde el día uno se pierden meses sin nada que mostrar. Lo que sí es innegociable es que el *modelo de datos* de las Fases 0–4 ya cumpla las reglas de la sección 04. Si desde el principio usás UUIDv7 del cliente, log de eventos y precios congelados, la Fase 5 es agregar transporte. Si no, es reescribir todo.
 
@@ -14,36 +14,11 @@ El esqueleto sobre el que se apoya todo. Aburrido y determinante.
 - **Postgres + Drizzle** con las migraciones de tenants, venues, users, memberships, devices y RLS activo.
 - **Auth de gestión** y el shell del panel admin con navegación por rol.
 - **CI**: typecheck, lint, tests, migración contra una base efímera.
-- **`CLAUDE.md`** con las convenciones del repo y las cinco reglas del modelo de datos.
 
 **Listo cuando**
 
 `pnpm dev` levanta API y admin, entrás con un usuario sembrado, y un test prueba que un tenant no puede leer datos del otro.
 
-#### Prompt de arranque para Claude Code
-
-```
-Vamos a arrancar el proyecto Resto Zest: un SaaS multi-tenant de gestión
-gastronómica. Leé el plan técnico adjunto antes de escribir código.
-
-Tarea de esta sesión — solo Fase 0:
-1. Armá el monorepo con pnpm workspaces + Turborepo, TypeScript estricto.
-   apps/: api, hub, admin, pos, waiter, kds, client
-   packages/: domain, db, ui, sync, printing
-2. En packages/db, Drizzle + migraciones para: tenants, venues, users,
-   memberships, devices. UUIDv7 generado en la app (no en la base),
-   plata en bigint centavos, deleted_at en todo lo borrable.
-3. RLS en todas las tablas con venue_id, usando current_setting('app.venue_id').
-   El helper de conexión debe hacer SET LOCAL dentro de la transacción.
-4. apps/api con Fastify + Zod, auth email/password para owner y admin.
-5. apps/admin con Vite + React + Tailwind v4 + shadcn/ui: login y shell con
-   navegación filtrada por rol.
-6. CI en GitHub Actions: typecheck, lint, vitest, migraciones contra Postgres.
-7. Un CLAUDE.md con las convenciones y las 5 reglas del modelo de datos.
-
-No implementes todavía productos, órdenes ni nada de negocio.
-Antes de codear, mostrame la estructura de carpetas propuesta y esperá mi ok.
-```
 ### FASE 1 — Catálogo y panel admin
 
 *2–3 semanas*
@@ -60,26 +35,6 @@ El primer módulo con valor real. Todo lo demás lee de acá.
 
 Cargás un menú real de una rotisería completa —con combos y modificadores— en menos de una hora, y podés subir todos los precios un 15 % y revertirlo.
 
-#### Prompt de arranque para Claude Code
-
-```
-Fase 1 de Resto Zest: catálogo y su ABM en el panel admin.
-
-1. Migraciones: categories, products, product_variants, modifier_groups,
-   modifiers, product_modifier_groups, combos, combo_items, price_lists,
-   prices, daily_menus, daily_menu_items, promotions, price_change_batches.
-   Seguí el esquema del plan técnico (sección 03) al pie de la letra.
-2. Endpoints CRUD en apps/api con validación Zod y chequeo de permisos por rol.
-3. UI en apps/admin: tabla con búsqueda y filtros, editor de producto en panel
-   lateral, reordenamiento drag & drop de categorías y productos.
-4. Remarcación masiva: modal para elegir alcance (categoría / tag / todo),
-   operación (% o monto), regla de redondeo (a los 10 / 50 / 100 pesos).
-   Guardá el snapshot previo en price_change_batches y agregá "Revertir lote".
-5. Upload de imágenes a R2 con presigned URL, recorte 4:3 y salida WebP.
-6. Tests: el revert de un lote deja los precios exactamente como estaban.
-
-Empezá por las migraciones y los tipos de dominio; mostrámelos antes de la UI.
-```
 ### FASE 2 — Client App — menú digital
 
 *2 semanas*
@@ -95,27 +50,6 @@ La primera cosa que se puede *vender sola*. Un menú por QR ya justifica una sus
 
 Escaneás el QR de la mesa 12 en un celular de gama baja con mala señal y el menú se ve completo, rápido y ordenado. Lighthouse mobile ≥ 90 en Performance y ≥ 95 en Accessibility.
 
-#### Prompt de arranque para Claude Code
-
-```
-Fase 2: la app de clientes (menú digital público) en apps/client con Next.js.
-
-1. Ruta /m/[venueSlug] con SSG + ISR revalidado por webhook al publicar cambios
-   en el admin. Ruta /m/[venueSlug]/mesa/[qrToken] que además muestra el número
-   de mesa y activa el modo "solo vista" (sin carrito).
-2. UI mobile-first: header compacto, barra de categorías sticky con scroll
-   horizontal, tarjetas de plato con imagen, precio y tags, y bottom sheet de
-   detalle con modificadores (solo informativos en modo vista).
-3. Buscador con debounce y filtros por tag (sin TACC, vegano, picante).
-4. Rendimiento: next/image, blurhash, fuentes con display:swap, JS mínimo.
-   Objetivo LCP < 1.5s en 3G simulado.
-5. Accesibilidad: contraste AA, foco visible, targets 44px, roles ARIA en el
-   bottom sheet, prefers-reduced-motion.
-6. Animaciones con Motion, sobrias: entrada escalonada de tarjetas y transición
-   del bottom sheet. Nada que trabe el scroll.
-
-El carrito y el checkout NO van en esta fase, van en la Fase 9.
-```
 ### FASE 3 — Núcleo operativo: mesas, órdenes y KDS
 
 *3–4 semanas*
@@ -132,31 +66,6 @@ El corazón del sistema. Todavía todo contra la nube: sin hub, sin offline. Per
 
 Simulás un servicio de 20 mesas entre dos personas y el KDS refleja todo sin recargar. Borrás las proyecciones, reproducís el log de eventos desde cero y obtenés exactamente el mismo estado.
 
-#### Prompt de arranque para Claude Code
-
-```
-Fase 3: núcleo operativo de Resto Zest (todavía 100% online).
-
-1. Migraciones: areas, tables, table_sessions, orders, order_items,
-   order_events, kitchen_tickets, stations. Ver sección 03 del plan.
-2. IMPORTANTE — patrón event-sourced: toda mutación de una orden entra como fila
-   en order_events con id UUIDv7 generado en el cliente. Un reductor puro en
-   packages/domain proyecta los eventos a orders/order_items. Los endpoints NO
-   hacen UPDATE directo sobre orders.
-   Escribí primero el reductor y sus tests unitarios, después el transporte.
-3. apps/waiter (Vite PWA, mobile-first): plano de mesas, abrir sesión con
-   comensales, buscar producto, elegir modificadores, nota libre, asignar tiempo
-   (course), enviar a estación. Targets de 48px, optimistic UI.
-4. apps/kds: Kanban de 3 columnas por estación, tarjeta por comanda con
-   cronómetro, borde ámbar a los 12 min y rojo + sonido a los 20 (configurable).
-   Pensado para pantalla fija, sin scroll horizontal, legible a 2 metros.
-5. WebSocket en apps/api: canal por venue, el KDS recibe eventos en < 1s.
-6. Test de replay: aplicar N eventos en orden aleatorio pero con el mismo
-   (lamport, device_id) debe dar siempre el mismo estado final.
-
-Arrancá por packages/domain: tipos de evento y reductor con tests. Mostrámelo
-antes de tocar la UI.
-```
 ### FASE 4 — POS y caja
 
 *2–3 semanas*
@@ -174,32 +83,6 @@ Donde entra la plata. Todavía sin gateways: solo registro de medios de pago.
 
 Dividís una mesa de 6 personas en 3 cuentas con medios mixtos y el cierre Z cuadra al centavo. Cobrás una mesa completa usando solo el teclado.
 
-#### Prompt de arranque para Claude Code
-
-```
-Fase 4: POS y caja.
-
-1. Migraciones: cash_registers, cash_sessions, cash_movements, payments,
-   bill_splits. Todo pago es un order_event de tipo payment.registered además
-   de una fila en payments (id UUIDv7 del cliente = idempotency key).
-2. apps/pos (Vite PWA, pensada para monitor + teclado):
-   - Lista de mesas activas con total en vivo.
-   - Panel de cobro: medios múltiples sobre una orden, vuelto calculado,
-     propina, descuento con motivo.
-   - División de cuenta en 3 modos: partes iguales / por ítems (drag & drop) /
-     monto libre. Los pagos resultantes comparten split_group.
-   - Atajos de teclado para todo el flujo de cobro; mostrá los atajos en la UI.
-3. Turno de caja: apertura con fondo, movimientos de entrada/salida con motivo,
-   cierre con conteo declarado, esperado calculado y diferencia. Encadená un
-   seal_hash sobre los movimientos del turno.
-4. Reporte de cierre Z: desglose por medio de pago, propinas, ventas por mozo,
-   anulaciones y descuentos con sus motivos.
-5. Tests de plata: cero errores de redondeo. Todo en bigint centavos, un único
-   helper de formateo.
-
-Priorizá la división de cuenta: es el flujo más usado y el que peor resuelven
-los competidores.
-```
 ### FASE 5 — Hub local y offline-first
 
 *3–4 semanas*
@@ -219,35 +102,6 @@ La fase difícil y la que define si el producto es serio. Todo lo anterior exist
 
 El test de caos pasa en CI y podés desenchufar el router del local durante 45 minutos de servicio simulado sin perder una sola orden ni un solo cobro.
 
-#### Prompt de arranque para Claude Code
-
-```
-Fase 5 — la más importante: hub local y offline-first.
-Leé de nuevo la sección 04 del plan técnico antes de empezar.
-
-1. apps/hub: reutilizá apps/api con ROLE=hub. Docker Compose con Postgres 17 +
-   el servicio Node. Las mismas migraciones de Drizzle corren en ambos lados.
-2. packages/sync, con tests antes que implementación:
-   - Outbox: cola persistida (Postgres en el hub, Dexie en el dispositivo) con
-     lamport, attempts, nextRetryAt y backoff exponencial con tope de 60s.
-   - Flush secuencial por lamport. Un fallo bloquea los siguientes eventos de la
-     MISMA orden, no de todas.
-   - Receptor idempotente: insertar un evento ya existente devuelve 200, no error.
-   - Pull descendente por cursor (server_seq) para catálogo, usuarios y config.
-3. Descubrimiento: el hub se anuncia por mDNS como restozest.local. El cliente
-   prueba LAN (timeout 800ms) → nube (2500ms) → offline, cada 5s, y persiste
-   la última ruta que funcionó.
-4. Store global de nivel L0/L1/L2 + helper canDo(action, level). Barra de estado
-   en las 4 apps operativas, con color Y texto.
-5. Bloqueos explícitos en L1/L2 según la sección 04 (nada de CAE, QR ni Point
-   offline; cierre de caja bloqueado en L2).
-6. Tabla sync_incidents + pantalla de resolución en el admin.
-7. Test de caos en Playwright, exactamente el escenario de 6 pasos de la
-   sección 04. Tiene que correr en CI.
-
-Empezá por packages/sync con tests unitarios. No toques la UI hasta que el
-outbox pase todos sus tests, incluido el de reenvío duplicado.
-```
 ### FASE 6 — Impresión térmica
 
 *1–2 semanas*

@@ -10,3 +10,8 @@ coverage/
 
 *.log
 .DS_Store
+
+# AI tooling
+.claude/
+CLAUDE.md
+AGENTS.md

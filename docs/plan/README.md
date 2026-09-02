@@ -1,7 +1,6 @@
 # Plan técnico de Resto Zest
 
 **No leas todo esto de una.** Cada archivo se lee cuando la tarea lo pide.
-`CLAUDE.md` en la raíz ya tiene las reglas que aplican siempre.
 
 | Archivo | Qué contiene | Cuándo leerlo |
 |---|---|---|
@@ -14,7 +13,6 @@
 | [`06-pagos-fiscal.md`](06-pagos-fiscal.md) | Mercado Pago Orders API, ARCA WSAA/WSFEv1 | Fase 7 |
 | [`07-seguridad.md`](07-seguridad.md) | Auth en dos planos, matriz de permisos, backups | Fase 0 (auth) y Fase 10 (backups) |
 | [`08-roadmap.md`](08-roadmap.md) | Las diez fases con entregables y criterios de aceptación | Al arrancar cada fase — solo la fase que toca |
-| [`09-flujo-claude-code.md`](09-flujo-claude-code.md) | Cómo trabajamos | Referencia |
 | [`10-riesgos.md`](10-riesgos.md) | Riesgos abiertos y decisiones diferidas | Al replanificar |
 
 El plan también está publicado como página web navegable, por si preferís leerlo así.
