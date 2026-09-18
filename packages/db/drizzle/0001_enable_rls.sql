@@ -3,25 +3,30 @@
 -- (resto_zest, ver docker/init.sql) no es superusuario ni tiene BYPASSRLS,
 -- así que FORCE aplica de verdad. Ver docs/adr/0002-contexto-rls-tenant-id.md.
 --
+-- NULLIF(current_setting(...), '') antes del ::uuid: un GUC custom (app.*)
+-- que nunca se seteó en la sesión devuelve '' (string vacío), no NULL, y
+-- ''::uuid explota en vez de devolver "sin filas". NULLIF lo convierte a
+-- NULL primero, así la comparación da UNKNOWN (cero filas) sin excepción.
+--
 -- sessions queda deliberadamente sin RLS: ver el comentario en
 -- src/schema/sessions.ts.
 
 ALTER TABLE tenants ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tenants FORCE ROW LEVEL SECURITY;
 CREATE POLICY tenant_isolation ON tenants
-  USING (id = current_setting('app.tenant_id', true)::uuid);
+  USING (id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
 --> statement-breakpoint
 
 ALTER TABLE venues ENABLE ROW LEVEL SECURITY;
 ALTER TABLE venues FORCE ROW LEVEL SECURITY;
 CREATE POLICY tenant_isolation ON venues
-  USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+  USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
 --> statement-breakpoint
 
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE users FORCE ROW LEVEL SECURITY;
 CREATE POLICY tenant_isolation ON users
-  USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+  USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
 --> statement-breakpoint
 
 -- memberships y devices se aíslan por tenant_id (vía subquery a venues), NO
@@ -34,10 +39,10 @@ CREATE POLICY tenant_isolation ON users
 ALTER TABLE memberships ENABLE ROW LEVEL SECURITY;
 ALTER TABLE memberships FORCE ROW LEVEL SECURITY;
 CREATE POLICY tenant_isolation ON memberships
-  USING (venue_id IN (SELECT id FROM venues WHERE tenant_id = current_setting('app.tenant_id', true)::uuid));
+  USING (venue_id IN (SELECT id FROM venues WHERE tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid));
 --> statement-breakpoint
 
 ALTER TABLE devices ENABLE ROW LEVEL SECURITY;
 ALTER TABLE devices FORCE ROW LEVEL SECURITY;
 CREATE POLICY tenant_isolation ON devices
-  USING (venue_id IN (SELECT id FROM venues WHERE tenant_id = current_setting('app.tenant_id', true)::uuid));
+  USING (venue_id IN (SELECT id FROM venues WHERE tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid));

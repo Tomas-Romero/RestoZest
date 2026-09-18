@@ -43,6 +43,20 @@ políticas, lo que en la práctica anula el aislamiento. Por esto
 `NOSUPERUSER NOBYPASSRLS` en vez de usar el superusuario por defecto de la
 imagen de Postgres.
 
+## Corrección (Fase 1): `NULLIF` antes del cast a `uuid`
+
+Todas las políticas quedaron escritas como `columna = current_setting('app.x', true)::uuid`.
+Esto funciona mientras `app.x` se setea siempre — pero un GUC custom (`app.*`)
+que nunca se seteó en la sesión actual devuelve **`''` (string vacío), no
+`NULL`**, la primera vez que se referencia sin haber sido asignado. `''::uuid`
+tira una excepción de Postgres en vez de simplemente no matchear ninguna
+fila, lo que rompe el caso legítimo de "tengo `tenant_id` pero todavía no
+elegí `venue_id`" (por ejemplo, justo después del login). El fix es
+envolver con `NULLIF(current_setting(...), '')` antes del `::uuid`: convierte
+la cadena vacía en `NULL`, la comparación da `UNKNOWN` (cero filas), sin
+excepción. Se corrigió en las políticas de Fase 0 (`0001_enable_rls.sql`) y
+se aplicó desde el arranque en las de Fase 1 (`0004_catalog_rls.sql`).
+
 ## Consecuencias
 
 - Todo código que escriba en `tenants`, `venues`, `users`, `memberships` o
