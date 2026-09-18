@@ -2,6 +2,12 @@ import cookie from "@fastify/cookie";
 import cors from "@fastify/cors";
 import Fastify, { type FastifyInstance } from "fastify";
 import { registerAuthRoutes } from "./routes/auth";
+import { registerCategoryRoutes } from "./routes/categories";
+import { registerComboRoutes } from "./routes/combos";
+import { registerModifierGroupRoutes } from "./routes/modifierGroups";
+import { registerProductModifierGroupRoutes } from "./routes/productModifierGroups";
+import { registerProductRoutes } from "./routes/products";
+import { registerProductVariantRoutes } from "./routes/productVariants";
 
 export async function buildApp(opts: { logger?: boolean } = {}): Promise<FastifyInstance> {
   const role = process.env.ROLE ?? "cloud";
@@ -15,6 +21,12 @@ export async function buildApp(opts: { logger?: boolean } = {}): Promise<Fastify
   app.get("/health", async () => ({ status: "ok", role }));
 
   registerAuthRoutes(app);
+  registerCategoryRoutes(app);
+  registerProductRoutes(app);
+  registerProductVariantRoutes(app);
+  registerProductModifierGroupRoutes(app);
+  registerModifierGroupRoutes(app);
+  registerComboRoutes(app);
 
   return app;
 }
