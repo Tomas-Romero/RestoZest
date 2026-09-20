@@ -11,10 +11,16 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.2.0",
+    "@dnd-kit/sortable": "^9.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
+    "@resto-zest/domain": "workspace:*",
     "@resto-zest/ui": "workspace:*",
     "@tanstack/react-query": "^5.62.11",
+    "lucide-react": "^0.469.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-router": "^7.1.1",
     "zod": "^3.24.1"
   },
   "devDependencies": {

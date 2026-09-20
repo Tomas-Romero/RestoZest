@@ -1,5 +1,7 @@
 import { Button } from "@resto-zest/ui";
 import { useMutation } from "@tanstack/react-query";
+import type { ReactNode } from "react";
+import { NavLink } from "react-router";
 import type { Membership } from "../lib/api";
 import { logout } from "../lib/api";
 
@@ -21,9 +23,10 @@ type ShellProps = {
   venueId: string | null;
   onSelectVenue: (venueId: string) => void;
   onLoggedOut: () => void;
+  children: ReactNode;
 };
 
-export function Shell({ user, memberships, venueId, onSelectVenue, onLoggedOut }: ShellProps) {
+export function Shell({ user, memberships, venueId, onSelectVenue, onLoggedOut, children }: ShellProps) {
   const logoutMutation = useMutation({ mutationFn: logout, onSuccess: onLoggedOut });
   const currentMembership = memberships.find((m) => m.venueId === venueId);
 
@@ -54,14 +57,20 @@ export function Shell({ user, memberships, venueId, onSelectVenue, onLoggedOut }
 
   return (
     <div className="flex min-h-screen">
-      <aside className="flex w-56 flex-col justify-between border-r border-border p-4">
+      <aside className="flex w-56 shrink-0 flex-col justify-between border-r border-border p-4">
         <div>
           <p className="mb-6 text-lg font-semibold">Resto Zest</p>
           <nav className="flex flex-col gap-1">
             {visibleSections.map((s) => (
-              <button key={s.key} type="button" className="rounded-md px-3 py-2 text-left text-sm hover:bg-muted">
+              <NavLink
+                key={s.key}
+                to={`/${s.key}`}
+                className={({ isActive }) =>
+                  `rounded-md px-3 py-2 text-left text-sm hover:bg-muted ${isActive ? "bg-muted font-medium" : ""}`
+                }
+              >
                 {s.label}
-              </button>
+              </NavLink>
             ))}
           </nav>
         </div>
@@ -77,9 +86,7 @@ export function Shell({ user, memberships, venueId, onSelectVenue, onLoggedOut }
           </Button>
         </div>
       </aside>
-      <main className="flex flex-1 items-center justify-center text-muted-foreground">
-        Elegí una sección — todavía no hay pantallas cargadas (llegan en fases siguientes).
-      </main>
+      <main className="min-w-0 flex-1 overflow-y-auto">{children}</main>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
+const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
 
 export class ApiError extends Error {
   status: number;
@@ -8,7 +8,7 @@ export class ApiError extends Error {
   }
 }
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
+export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_URL}${path}`, {
     ...init,
     credentials: "include",
@@ -18,8 +18,12 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     const body = await res.json().catch(() => ({}) as { error?: string });
     throw new ApiError(res.status, body.error ?? `Error ${res.status}`);
   }
+  if (res.status === 204) {
+    return undefined as T;
+  }
   return res.json() as Promise<T>;
 }
+const request = apiRequest;
 
 export type Membership = { venueId: string; venueName: string; role: string };
 
