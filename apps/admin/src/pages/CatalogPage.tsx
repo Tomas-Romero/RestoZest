@@ -23,10 +23,49 @@ import {
   reorderProduct,
 } from "../lib/catalogApi";
 import { canManageCatalog, useVenue } from "../lib/venueContext";
+import { DailyMenusTab } from "./DailyMenusTab";
 import { PriceChangeSheet } from "./PriceChangeSheet";
+import { PriceListsTab } from "./PriceListsTab";
 import { ProductEditorSheet } from "./ProductEditorSheet";
+import { PromotionsTab } from "./PromotionsTab";
+
+const TABS = [
+  { key: "products", label: "Productos" },
+  { key: "priceLists", label: "Listas de precio" },
+  { key: "dailyMenus", label: "Menú del día" },
+  { key: "promotions", label: "Promociones" },
+] as const;
+type TabKey = (typeof TABS)[number]["key"];
 
 export function CatalogPage() {
+  const [tab, setTab] = useState<TabKey>("products");
+
+  return (
+    <div className="mx-auto max-w-3xl p-8">
+      <div className="mb-6 flex gap-1 border-b border-border">
+        {TABS.map((t) => (
+          <button
+            key={t.key}
+            type="button"
+            onClick={() => setTab(t.key)}
+            className={`border-b-2 px-3 py-2 text-sm ${
+              tab === t.key ? "border-primary font-medium" : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {tab === "products" && <ProductsTab />}
+      {tab === "priceLists" && <PriceListsTab />}
+      {tab === "dailyMenus" && <DailyMenusTab />}
+      {tab === "promotions" && <PromotionsTab />}
+    </div>
+  );
+}
+
+function ProductsTab() {
   const { venueId, role } = useVenue();
   const canEdit = canManageCatalog(role);
   const queryClient = useQueryClient();
@@ -77,7 +116,7 @@ export function CatalogPage() {
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
 
   if (categoriesQuery.isLoading || productsQuery.isLoading) {
-    return <div className="p-8 text-muted-foreground">Cargando catálogo…</div>;
+    return <div className="text-muted-foreground">Cargando catálogo…</div>;
   }
 
   const categories = categoriesQuery.data ?? [];
@@ -125,7 +164,7 @@ export function CatalogPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl p-8">
+    <div>
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-xl font-semibold">Catálogo</h1>
         {canEdit && (

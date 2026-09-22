@@ -4,11 +4,14 @@ import Fastify, { type FastifyInstance } from "fastify";
 import { registerAuthRoutes } from "./routes/auth";
 import { registerCategoryRoutes } from "./routes/categories";
 import { registerComboRoutes } from "./routes/combos";
+import { registerDailyMenuRoutes } from "./routes/dailyMenus";
 import { registerModifierGroupRoutes } from "./routes/modifierGroups";
 import { registerPriceChangeBatchRoutes } from "./routes/priceChangeBatches";
+import { registerPriceListRoutes } from "./routes/priceLists";
 import { registerProductModifierGroupRoutes } from "./routes/productModifierGroups";
 import { registerProductRoutes } from "./routes/products";
 import { registerProductVariantRoutes } from "./routes/productVariants";
+import { registerPromotionRoutes } from "./routes/promotions";
 
 export async function buildApp(opts: { logger?: boolean } = {}): Promise<FastifyInstance> {
   const role = process.env.ROLE ?? "cloud";
@@ -29,6 +32,9 @@ export async function buildApp(opts: { logger?: boolean } = {}): Promise<Fastify
   registerModifierGroupRoutes(app);
   registerComboRoutes(app);
   registerPriceChangeBatchRoutes(app);
+  registerPriceListRoutes(app);
+  registerDailyMenuRoutes(app);
+  registerPromotionRoutes(app);
 
   return app;
 }
