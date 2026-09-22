@@ -134,3 +134,38 @@ export function updateVariant(
 export function deleteVariant(venueId: string, productId: string, variantId: string): Promise<void> {
   return apiRequest(`/venues/${venueId}/products/${productId}/variants/${variantId}`, { method: "DELETE" });
 }
+
+export type RoundingOption = 10 | 50 | 100;
+
+export type PriceChangeBatch = {
+  id: string;
+  venueId: string;
+  rule: { scope: "all" | "category" | "tag"; categoryId?: string; tag?: string; op: "percent" | "fixed"; percent?: number; amountCents?: number; rounding?: RoundingOption };
+  snapshot: Record<string, number>;
+  appliedBy: string;
+  appliedAt: string;
+  revertedAt: string | null;
+};
+
+export type ApplyBatchInput =
+  | { scope: "all"; op: "percent"; percent: number; rounding?: RoundingOption }
+  | { scope: "all"; op: "fixed"; amountCents: number; rounding?: RoundingOption }
+  | { scope: "category"; categoryId: string; op: "percent"; percent: number; rounding?: RoundingOption }
+  | { scope: "category"; categoryId: string; op: "fixed"; amountCents: number; rounding?: RoundingOption }
+  | { scope: "tag"; tag: string; op: "percent"; percent: number; rounding?: RoundingOption }
+  | { scope: "tag"; tag: string; op: "fixed"; amountCents: number; rounding?: RoundingOption };
+
+export function fetchPriceChangeBatches(venueId: string): Promise<PriceChangeBatch[]> {
+  return apiRequest(`/venues/${venueId}/price-change-batches`);
+}
+
+export function applyPriceChangeBatch(
+  venueId: string,
+  input: ApplyBatchInput,
+): Promise<{ batch: PriceChangeBatch; affectedCount: number }> {
+  return apiRequest(`/venues/${venueId}/price-change-batches`, { method: "POST", body: JSON.stringify(input) });
+}
+
+export function revertPriceChangeBatch(venueId: string, batchId: string): Promise<PriceChangeBatch> {
+  return apiRequest(`/venues/${venueId}/price-change-batches/${batchId}/revert`, { method: "POST" });
+}

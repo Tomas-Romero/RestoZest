@@ -9,7 +9,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { formatCents } from "@resto-zest/domain";
 import { Button, Input } from "@resto-zest/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { GripVertical, Plus } from "lucide-react";
+import { GripVertical, Percent, Plus } from "lucide-react";
 import { useState } from "react";
 import {
   type Category,
@@ -23,6 +23,7 @@ import {
   reorderProduct,
 } from "../lib/catalogApi";
 import { canManageCatalog, useVenue } from "../lib/venueContext";
+import { PriceChangeSheet } from "./PriceChangeSheet";
 import { ProductEditorSheet } from "./ProductEditorSheet";
 
 export function CatalogPage() {
@@ -36,6 +37,7 @@ export function CatalogPage() {
   const [editing, setEditing] = useState<Product | "new" | null>(null);
   const [newCategoryOpen, setNewCategoryOpen] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
+  const [priceChangeOpen, setPriceChangeOpen] = useState(false);
 
   const invalidateCategories = () => queryClient.invalidateQueries({ queryKey: ["categories", venueId] });
   const invalidateProducts = () => queryClient.invalidateQueries({ queryKey: ["products", venueId] });
@@ -127,9 +129,14 @@ export function CatalogPage() {
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-xl font-semibold">Catálogo</h1>
         {canEdit && (
-          <Button size="sm" onClick={() => setEditing("new")}>
-            <Plus className="mr-1 h-4 w-4" /> Producto
-          </Button>
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={() => setPriceChangeOpen(true)}>
+              <Percent className="mr-1 h-4 w-4" /> Remarcación masiva
+            </Button>
+            <Button size="sm" onClick={() => setEditing("new")}>
+              <Plus className="mr-1 h-4 w-4" /> Producto
+            </Button>
+          </div>
         )}
       </div>
 
@@ -211,6 +218,8 @@ export function CatalogPage() {
           onClose={() => setEditing(null)}
         />
       )}
+
+      {priceChangeOpen && <PriceChangeSheet categories={categories} onClose={() => setPriceChangeOpen(false)} />}
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { registerAuthRoutes } from "./routes/auth";
 import { registerCategoryRoutes } from "./routes/categories";
 import { registerComboRoutes } from "./routes/combos";
 import { registerModifierGroupRoutes } from "./routes/modifierGroups";
+import { registerPriceChangeBatchRoutes } from "./routes/priceChangeBatches";
 import { registerProductModifierGroupRoutes } from "./routes/productModifierGroups";
 import { registerProductRoutes } from "./routes/products";
 import { registerProductVariantRoutes } from "./routes/productVariants";
@@ -27,6 +28,7 @@ export async function buildApp(opts: { logger?: boolean } = {}): Promise<Fastify
   registerProductModifierGroupRoutes(app);
   registerModifierGroupRoutes(app);
   registerComboRoutes(app);
+  registerPriceChangeBatchRoutes(app);
 
   return app;
 }
