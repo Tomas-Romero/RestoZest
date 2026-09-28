@@ -41,8 +41,8 @@ describe("CRUD de catálogo (categorías, productos, variantes)", () => {
     await withContext({ tenantId }, async (tx) => {
       await tx.insert(tenants).values({ id: tenantId, name: "Tenant catálogo test", slug: tenantId });
       await tx.insert(venues).values([
-        { id: venueId, tenantId, name: "Venue principal" },
-        { id: otherVenueId, tenantId, name: "Venue ajeno" },
+        { id: venueId, tenantId, name: "Venue principal", slug: venueId },
+        { id: otherVenueId, tenantId, name: "Venue ajeno", slug: otherVenueId },
       ]);
       await tx.insert(users).values([
         { id: ownerId, tenantId, fullName: "Owner", email: ownerEmail, passwordHash, active: true },

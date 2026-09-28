@@ -10,3 +10,5 @@ export {
   verifyPassword,
 } from "./auth";
 export type { LoginLookup } from "./auth";
+export { findTableByQrToken, findVenueBySlug, getPublicMenu } from "./publicMenu";
+export type { PublicMenu, PublicMenuModifier, PublicMenuModifierGroup, PublicMenuProduct, PublicMenuVariant, PublicVenue } from "./publicMenu";

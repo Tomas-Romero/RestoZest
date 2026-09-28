@@ -36,6 +36,20 @@
       "when": 1788292400650,
       "tag": "0004_catalog_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790544268153,
+      "tag": "0005_parallel_daimon_hellstrom",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790544282008,
+      "tag": "0006_public_menu_access",
+      "breakpoints": true
     }
   ]
 }

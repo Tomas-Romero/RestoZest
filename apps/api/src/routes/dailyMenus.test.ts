@@ -37,7 +37,7 @@ describe("menú del día", () => {
     const passwordHash = await hashPassword(password);
     await withContext({ tenantId }, async (tx) => {
       await tx.insert(tenants).values({ id: tenantId, name: "Tenant daily menus test", slug: tenantId });
-      await tx.insert(venues).values({ id: venueId, tenantId, name: "Venue" });
+      await tx.insert(venues).values({ id: venueId, tenantId, name: "Venue", slug: venueId });
       await tx.insert(users).values({ id: ownerId, tenantId, fullName: "Owner", email, passwordHash, active: true });
     });
     await withContext({ tenantId, venueId }, async (tx) => {

@@ -1,20 +1,9 @@
 import { hash, verify } from "@node-rs/argon2";
 import { generateId } from "@resto-zest/domain";
 import { eq } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
+import { bypassDb } from "./bypassClient";
 import { db } from "./client";
 import { sessions, users } from "./schema";
-
-const authConnectionString = process.env.AUTH_DATABASE_URL;
-if (!authConnectionString) {
-  throw new Error("AUTH_DATABASE_URL no está definida");
-}
-
-// Conexión aparte, con el rol angosto resto_zest_auth (BYPASSRLS + grant a
-// nivel de columna). Nunca reutilizar el `db` general para este lookup.
-const authClient = postgres(authConnectionString);
-const authDb = drizzle(authClient);
 
 export async function hashPassword(password: string): Promise<string> {
   return hash(password);
@@ -32,7 +21,7 @@ export type LoginLookup = {
 };
 
 export async function findUserForLogin(email: string): Promise<LoginLookup | null> {
-  const rows = await authDb
+  const rows = await bypassDb
     .select({
       id: users.id,
       tenantId: users.tenantId,

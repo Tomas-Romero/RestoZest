@@ -7,6 +7,7 @@ export const venues = pgTable("venues", {
     .notNull()
     .references(() => tenants.id),
   name: text("name").notNull(),
+  slug: text("slug").notNull().unique(), // identifica al venue en la URL pública del menú (/m/[slug])
   timezone: text("timezone").notNull().default("America/Argentina/Buenos_Aires"),
   fiscalConfig: jsonb("fiscal_config"), // { cuit, pto_venta, condicion_iva, razon_social }
   settings: jsonb("settings").notNull().default({}), // propina sugerida, cubierto, etc.

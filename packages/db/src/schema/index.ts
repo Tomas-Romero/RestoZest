@@ -18,3 +18,4 @@ export * from "./priceChangeBatches";
 export * from "./dailyMenus";
 export * from "./dailyMenuItems";
 export * from "./promotions";
+export * from "./tables";

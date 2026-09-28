@@ -15,7 +15,7 @@ async function createTenant(name: string): Promise<Seeded> {
 
   await withContext({ tenantId }, async (tx) => {
     await tx.insert(tenants).values({ id: tenantId, name, slug: tenantId });
-    await tx.insert(venues).values({ id: venueId, tenantId, name: `${name} - venue` });
+    await tx.insert(venues).values({ id: venueId, tenantId, name: `${name} - venue`, slug: venueId });
     await tx.insert(users).values({ id: userId, tenantId, fullName: name });
   });
 
