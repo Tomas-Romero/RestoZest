@@ -5,6 +5,7 @@ import { withContext } from "./client";
 import { categories, devices, memberships, productVariants, products, tables, tenants, users, venues } from "./schema";
 
 const SEED_PASSWORD = "resto1234";
+const SEED_PIN = "1234";
 
 async function seedTenant(name: string, slug: string, opts: { withCatalog?: boolean } = {}) {
   const tenantId = generateId();
@@ -47,6 +48,20 @@ async function seedTenant(name: string, slug: string, opts: { withCatalog?: bool
       ]);
       await tx.insert(productVariants).values({ id: generateId(), venueId, productId: empanadaId, name: "Docena", priceDeltaCents: 1200000 });
       await tx.insert(tables).values({ id: generateId(), venueId, code: "12", qrToken: `${slug}-mesa-12` });
+
+      // plano operativo: mozo y cocina de prueba, login por PIN (sin email/password)
+      // PINs distintos a propósito: si fueran iguales, cuál usuario matchea
+      // primero sería no determinístico (ver findUsersForPinLogin).
+      const waiterId = generateId();
+      const kitchenId = generateId();
+      await tx.insert(users).values([
+        { id: waiterId, tenantId, fullName: "Mozo de prueba", pinHash: await hashPassword(SEED_PIN) },
+        { id: kitchenId, tenantId, fullName: "Cocinero de prueba", pinHash: await hashPassword("5678") },
+      ]);
+      await tx.insert(memberships).values([
+        { userId: waiterId, venueId, role: "waiter" },
+        { userId: kitchenId, venueId, role: "kitchen" },
+      ]);
     }
   });
 
@@ -59,6 +74,8 @@ async function main() {
   console.log("Seed listo. Login de prueba (plano de gestión):");
   console.log(`  ${a.email} / ${SEED_PASSWORD}`);
   console.log(`  ${b.email} / ${SEED_PASSWORD}`);
+  console.log("Login PIN de prueba (plano operativo, solo en rotiseria-demo):");
+  console.log(`  mozo: PIN ${SEED_PIN} — cocina: PIN 5678`);
   console.log("Menú público de prueba: /m/rotiseria-demo (mesa: /m/rotiseria-demo/mesa/rotiseria-demo-mesa-12)");
   console.log(JSON.stringify({ a, b }, null, 2));
 }
