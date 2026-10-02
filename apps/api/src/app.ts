@@ -6,6 +6,7 @@ import { registerCategoryRoutes } from "./routes/categories";
 import { registerComboRoutes } from "./routes/combos";
 import { registerDailyMenuRoutes } from "./routes/dailyMenus";
 import { registerModifierGroupRoutes } from "./routes/modifierGroups";
+import { registerOrderRoutes } from "./routes/orders";
 import { registerPriceChangeBatchRoutes } from "./routes/priceChangeBatches";
 import { registerPriceListRoutes } from "./routes/priceLists";
 import { registerProductModifierGroupRoutes } from "./routes/productModifierGroups";
@@ -37,6 +38,7 @@ export async function buildApp(opts: { logger?: boolean } = {}): Promise<Fastify
   registerDailyMenuRoutes(app);
   registerPromotionRoutes(app);
   registerPublicMenuRoutes(app);
+  registerOrderRoutes(app);
 
   return app;
 }

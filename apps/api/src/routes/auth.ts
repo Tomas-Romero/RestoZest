@@ -3,6 +3,8 @@ import {
   deleteSession,
   findSession,
   findUserForLogin,
+  findUsersForPinLogin,
+  findVenueById,
   memberships,
   users,
   venues,
@@ -18,6 +20,10 @@ const SESSION_COOKIE = "rz_session";
 const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
+});
+
+const pinLoginSchema = z.object({
+  pin: z.string().min(4).max(6),
 });
 
 function setSessionCookie(reply: import("fastify").FastifyReply, sessionId: string, expiresAt: Date) {
@@ -52,6 +58,38 @@ export function registerAuthRoutes(app: FastifyInstance) {
     return { ok: true };
   });
 
+  // Plano operativo (07-seguridad.md): PIN en vez de email+contraseña.
+  // Todavía sin dispositivo enrolado ni offline (eso es Fase 5) — Fase 3 es
+  // 100% online, así que esto alcanza con validar contra la nube.
+  app.post("/venues/:venueId/auth/pin-login", async (request, reply) => {
+    const body = pinLoginSchema.safeParse(request.body);
+    if (!body.success) {
+      return reply.code(400).send({ error: "datos inválidos", issues: body.error.issues });
+    }
+    const { venueId } = request.params as { venueId: string };
+
+    const venue = await findVenueById(venueId);
+    if (!venue) {
+      return reply.code(404).send({ error: "no encontrado" });
+    }
+
+    const candidates = await findUsersForPinLogin(venue.tenantId, venueId);
+    let matched: (typeof candidates)[number] | null = null;
+    for (const candidate of candidates) {
+      if (await verifyPassword(candidate.pinHash, body.data.pin)) {
+        matched = candidate;
+        break;
+      }
+    }
+    if (!matched) {
+      return reply.code(401).send({ error: "PIN inválido" });
+    }
+
+    const session = await createSession(matched.id, venue.tenantId, { venueId, operational: true });
+    setSessionCookie(reply, session.id, session.expiresAt);
+    return { ok: true, user: { id: matched.id, fullName: matched.fullName }, role: matched.role };
+  });
+
   app.get("/auth/me", async (request, reply) => {
     const sessionId = request.cookies[SESSION_COOKIE];
     if (!sessionId) {
@@ -77,10 +115,17 @@ export function registerAuthRoutes(app: FastifyInstance) {
         .innerJoin(venues, eq(venues.id, memberships.venueId))
         .where(eq(memberships.userId, session.userId));
 
+      // Si la sesión ya trae venueId (login PIN), el rol de esa membership
+      // puntual también viaja directo — evita que apps/waiter tenga que
+      // buscarlo en la lista de memberships como hace el admin.
+      const currentMembership = venueMemberships.find((m) => m.venueId === session.venueId);
+
       return {
         user,
         tenantId: session.tenantId,
         memberships: venueMemberships,
+        venueId: session.venueId ?? null,
+        role: currentMembership?.role ?? null,
       };
     });
   });
