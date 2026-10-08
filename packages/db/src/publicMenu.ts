@@ -5,6 +5,7 @@ import {
   categories,
   modifierGroups,
   modifiers,
+  prices,
   productModifierGroups,
   productVariants,
   products,
@@ -55,11 +56,16 @@ export type PublicMenu = {
   products: PublicMenuProduct[];
 };
 
+export type OperationalMenuProduct = PublicMenuProduct & { prepStation: string; costCents: number | null };
+export type OperationalMenu = { categories: PublicMenu["categories"]; products: OperationalMenuProduct[] };
+
 /**
  * Una vez resuelto el venue, todo esto sí pasa por el `db` general con RLS
  * normal (withContext ya deja el resto de las queries acotadas al venue).
+ * `loadMenu` arma el menú con los campos operativos (estación, costo); la
+ * versión pública los saca — nunca exponer costos al menú de los clientes.
  */
-export async function getPublicMenu(tenantId: string, venueId: string): Promise<PublicMenu> {
+async function loadMenu(tenantId: string, venueId: string, priceListId?: string): Promise<OperationalMenu> {
   return withContext({ tenantId, venueId }, async (tx) => {
     const [categoryRows, productRows, variantRows, pmgRows, groupRows, modifierRows] = await Promise.all([
       tx.select().from(categories).where(isNull(categories.deletedAt)).orderBy(categories.position),
@@ -96,7 +102,17 @@ export async function getPublicMenu(tenantId: string, venueId: string): Promise<
       groupIdsByProduct.set(pmg.productId, list);
     }
 
-    const publicProducts: PublicMenuProduct[] = productRows
+    // Precio por canal: si la lista tiene un override para el producto base
+    // (sin variante), reemplaza basePriceCents. Los deltas de variante no cambian.
+    const overrideByProduct = new Map<string, number>();
+    if (priceListId) {
+      const overrides = await tx.select().from(prices).where(eq(prices.priceListId, priceListId));
+      for (const o of overrides) {
+        if (o.variantId === null) overrideByProduct.set(o.productId, o.priceCents);
+      }
+    }
+
+    const menuProducts: OperationalMenuProduct[] = productRows
       .filter((p) => p.available)
       .map((p) => ({
         id: p.id,
@@ -104,10 +120,12 @@ export async function getPublicMenu(tenantId: string, venueId: string): Promise<
         name: p.name,
         description: p.description,
         imageUrl: p.imageUrl,
-        basePriceCents: p.basePriceCents,
+        basePriceCents: overrideByProduct.get(p.id) ?? p.basePriceCents,
         kind: p.kind,
         tags: p.tags,
         position: p.position,
+        prepStation: p.prepStation,
+        costCents: p.costCents,
         variants: variantsByProduct.get(p.id) ?? [],
         modifierGroups: (groupIdsByProduct.get(p.id) ?? [])
           .map((groupId) => groupsById.get(groupId))
@@ -123,9 +141,22 @@ export async function getPublicMenu(tenantId: string, venueId: string): Promise<
 
     return {
       categories: categoryRows.map((c) => ({ id: c.id, name: c.name, position: c.position })),
-      products: publicProducts,
+      products: menuProducts,
     };
   });
+}
+
+export async function getPublicMenu(tenantId: string, venueId: string): Promise<PublicMenu> {
+  const menu = await loadMenu(tenantId, venueId);
+  return {
+    categories: menu.categories,
+    products: menu.products.map(({ prepStation: _prepStation, costCents: _costCents, ...publicProduct }) => publicProduct),
+  };
+}
+
+/** Menú para el plano operativo (mozo/POS): incluye estación y costo, y aplica la lista de precios del canal. */
+export async function getOperationalMenu(tenantId: string, venueId: string, priceListId?: string): Promise<OperationalMenu> {
+  return loadMenu(tenantId, venueId, priceListId);
 }
 
 export async function findTableByQrToken(tenantId: string, venueId: string, qrToken: string) {

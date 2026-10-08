@@ -1,5 +1,5 @@
 import { createHash, randomBytes } from "node:crypto";
-import { areas, devices, orderItems, orders, tableSessions, tables, withContext } from "@resto-zest/db";
+import { areas, devices, getOperationalMenu, orderItems, orders, tableSessions, tables, withContext } from "@resto-zest/db";
 import { generateId } from "@resto-zest/domain";
 import { and, eq, inArray, isNull } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
@@ -48,6 +48,15 @@ export function registerSalonRoutes(app: FastifyInstance) {
       }),
     );
     return reply.code(201).send({ id });
+  });
+
+  // Menú para tomar pedidos: igual al público pero con estación y costo (los
+  // necesita el evento item.added), y con los precios de la lista del canal.
+  app.get("/venues/:venueId/pos-menu", async (request, reply) => {
+    const auth = await requireVenueAuth(request, reply);
+    if (!auth) return;
+    const { priceListId } = request.query as { priceListId?: string };
+    return getOperationalMenu(auth.tenantId, auth.venueId, priceListId);
   });
 
   // Plano completo: áreas + mesas, cada mesa con su sesión abierta (si hay).

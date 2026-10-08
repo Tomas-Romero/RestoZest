@@ -6,7 +6,9 @@ import {
   memberships,
   orderItems,
   orders,
+  prices,
   priceLists,
+  products,
   sessions,
   tableSessions,
   tables,
@@ -68,7 +70,9 @@ describe("salón: plano, dispositivos y sesiones de mesa", () => {
       await tx.delete(tables).where(eq(tables.venueId, venueId));
       await tx.delete(areas).where(eq(areas.venueId, venueId));
       await tx.delete(devices).where(eq(devices.venueId, venueId));
+      await tx.delete(prices).where(eq(prices.venueId, venueId));
       await tx.delete(priceLists).where(eq(priceLists.venueId, venueId));
+      await tx.delete(products).where(eq(products.venueId, venueId));
       await tx.delete(memberships).where(eq(memberships.venueId, venueId));
     });
     await withContext({ tenantId }, async (tx) => {
@@ -151,5 +155,36 @@ describe("salón: plano, dispositivos y sesiones de mesa", () => {
       headers: { cookie: waiterCookie },
     });
     expect(sessionOrders.json()).toEqual([]);
+  });
+
+  it("pos-menu trae estación y costo, y aplica el precio de la lista del canal", async () => {
+    const productId = generateId();
+    const priceListId = generateId();
+    await withContext({ tenantId, venueId }, async (tx) => {
+      await tx.insert(products).values({
+        id: productId,
+        venueId,
+        name: "Cerveza",
+        basePriceCents: 300000,
+        costCents: 90000,
+        prepStation: "bar",
+        kind: "drink",
+      });
+      await tx.insert(priceLists).values({ id: priceListId, venueId, name: "Salón", channel: "salon" });
+      await tx.insert(prices).values({ id: generateId(), venueId, priceListId, productId, priceCents: 350000 });
+    });
+
+    const res = await app.inject({
+      method: "GET",
+      url: `/venues/${venueId}/pos-menu?priceListId=${priceListId}`,
+      headers: { cookie: waiterCookie },
+    });
+    expect(res.statusCode).toBe(200);
+    const cerveza = res.json().products.find((p: { id: string }) => p.id === productId);
+    expect(cerveza).toMatchObject({ prepStation: "bar", costCents: 90000, basePriceCents: 350000 });
+
+    // el menú público, en cambio, nunca expone estación ni costo
+    const sinLista = await app.inject({ method: "GET", url: `/venues/${venueId}/pos-menu`, headers: { cookie: waiterCookie } });
+    expect(sinLista.json().products.find((p: { id: string }) => p.id === productId).basePriceCents).toBe(300000);
   });
 });
