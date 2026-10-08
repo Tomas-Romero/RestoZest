@@ -2,7 +2,7 @@ import "dotenv/config";
 import { generateId } from "@resto-zest/domain";
 import { hashPassword } from "./auth";
 import { withContext } from "./client";
-import { categories, devices, memberships, productVariants, products, tables, tenants, users, venues } from "./schema";
+import { areas, categories, devices, memberships, priceLists, productVariants, products, tables, tenants, users, venues } from "./schema";
 
 const SEED_PASSWORD = "resto1234";
 const SEED_PIN = "1234";
@@ -47,7 +47,21 @@ async function seedTenant(name: string, slug: string, opts: { withCatalog?: bool
         { id: gaseosaId, venueId, categoryId, name: "Gaseosa 500ml", basePriceCents: 200000, kind: "drink", tags: [] },
       ]);
       await tx.insert(productVariants).values({ id: generateId(), venueId, productId: empanadaId, name: "Docena", priceDeltaCents: 1200000 });
-      await tx.insert(tables).values({ id: generateId(), venueId, code: "12", qrToken: `${slug}-mesa-12` });
+      await tx.insert(priceLists).values({ id: generateId(), venueId, name: "Salón", channel: "salon" });
+      const areaId = generateId();
+      await tx.insert(areas).values({ id: areaId, venueId, name: "Salón" });
+      await tx.insert(tables).values(
+        ["11", "12", "13", "14"].map((code, i) => ({
+          id: generateId(),
+          venueId,
+          areaId,
+          code,
+          seats: 4,
+          posX: 40 + i * 120,
+          posY: 60,
+          qrToken: `${slug}-mesa-${code}`,
+        })),
+      );
 
       // plano operativo: mozo y cocina de prueba, login por PIN (sin email/password)
       // PINs distintos a propósito: si fueran iguales, cuál usuario matchea

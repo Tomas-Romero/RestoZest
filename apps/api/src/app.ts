@@ -14,6 +14,7 @@ import { registerProductRoutes } from "./routes/products";
 import { registerProductVariantRoutes } from "./routes/productVariants";
 import { registerPromotionRoutes } from "./routes/promotions";
 import { registerPublicMenuRoutes } from "./routes/publicMenu";
+import { registerSalonRoutes } from "./routes/salon";
 
 export async function buildApp(opts: { logger?: boolean } = {}): Promise<FastifyInstance> {
   const role = process.env.ROLE ?? "cloud";
@@ -39,6 +40,7 @@ export async function buildApp(opts: { logger?: boolean } = {}): Promise<Fastify
   registerPromotionRoutes(app);
   registerPublicMenuRoutes(app);
   registerOrderRoutes(app);
+  registerSalonRoutes(app);
 
   return app;
 }
