@@ -11,13 +11,21 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
+    "@resto-zest/domain": "workspace:*",
+    "@resto-zest/ui": "workspace:*",
+    "@tanstack/react-query": "^5.62.11",
+    "lucide-react": "^0.469.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@tailwindcss/vite": "^4.0.0",
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.2",
     "@vitejs/plugin-react": "^4.3.4",
-    "vite": "^6.0.6"
+    "tailwindcss": "^4.0.0",
+    "vite": "^6.0.6",
+    "vite-plugin-pwa": "^0.21.1",
+    "workbox-window": "^7.4.1"
   }
 }
